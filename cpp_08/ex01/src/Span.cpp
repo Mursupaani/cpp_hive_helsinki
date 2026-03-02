@@ -50,9 +50,10 @@ unsigned int Span::longestSpan(void) const{
 }
 
 void Span::fillSpan(const unsigned int count) {
-
+	(void)count;
 }
 
+// FIXME: delete me
 #include <iostream>
 void Span::printSpan(){
 	for (auto val : _data)
