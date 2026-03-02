@@ -56,4 +56,34 @@ int main(void) {
 		}
 		std::cout << "____________________\n\n";
 	}
+	{
+		std::cout << "TEST 4 (std::array):\n";
+		std::array<int, 5> array = {0, 1, 2, 3, 4};
+		int &x = easyfind(array, 0);
+		x = 10;
+		for (auto val : array)
+		std::cout << val << std::endl;
+		try {
+			std::cout << "\nLooking for 10\n";
+			std::cout << easyfind(array, 10) << std::endl;
+		} catch (std::runtime_error &e) {
+			std::cout << e.what() << std::endl;
+		}
+		std::cout << "____________________\n\n";
+	}
+	{
+		std::cout << "TEST 5 (const std::array):\n";
+		const std::array<int, 5> array = {0, 1, 2, 3, 4};
+		// int &x = easyfind(array, 0);
+		// x = 10;
+		for (auto val : array)
+		std::cout << val << std::endl;
+		try {
+			std::cout << "\nLooking for 10\n";
+			std::cout << easyfind(array, 10) << std::endl;
+		} catch (std::runtime_error &e) {
+			std::cout << e.what() << std::endl;
+		}
+		std::cout << "____________________\n\n";
+	}
 }
