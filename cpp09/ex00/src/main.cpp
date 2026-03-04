@@ -10,8 +10,19 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <iostream>
-
 #include "BitcoinExchange.hpp"
 
-int main(void) {}
+int main(int ac, char **av) {
+	if (ac != 2) {
+		std::cout << "ERROR: Please input argument <input_data>" << std::endl;
+		return (1);
+	}
+	try {
+		std::string input = av[1];
+		BitcoinExchange::loadDataBase();
+		BitcoinExchange::openInputFile(input);
+	} catch (std::exception &e) {
+		std::cerr << "ERROR: " << e.what() << std::endl;
+		return (1);
+	}
+}
