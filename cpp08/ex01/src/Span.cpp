@@ -1,5 +1,7 @@
 #include "Span.hpp"
 
+#include <vector>
+
 Span::Span(unsigned int N) : _maxSize(N) {
 	_data.reserve(N);
 }
@@ -23,14 +25,16 @@ void Span::addNumber(const unsigned int num) {
 								 ". Span is already full.");
 }
 
-unsigned int Span::shortestSpan(void) {
+unsigned int Span::shortestSpan(void) const {
 	size_t size = _data.size();
 	if (size < 2)
 		throw std::runtime_error("Can't find span when size is " +
 								 std::to_string(_data.size()));
-	std::sort(_data.begin(), _data.end());
+	std::vector<int> sortedCopy(this->_data);
+	std::sort(sortedCopy.begin(), sortedCopy.end());
 	std::vector<unsigned int> spans(_maxSize, 0);
-	std::adjacent_difference(_data.begin(), _data.end(), spans.begin());
+	std::adjacent_difference(sortedCopy.begin(), sortedCopy.end(),
+							 spans.begin());
 	return (*std::min_element(spans.begin() + 1, spans.end()));
 }
 

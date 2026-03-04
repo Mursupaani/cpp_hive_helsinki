@@ -18,7 +18,7 @@ class Span {
 		~Span(void);
 
 		void		 addNumber(const unsigned int num);
-		unsigned int shortestSpan(void);
+		unsigned int shortestSpan(void) const;
 		unsigned int longestSpan(void) const;
 		void		 fillSpanRandom(const int smallest, const int largest);
 

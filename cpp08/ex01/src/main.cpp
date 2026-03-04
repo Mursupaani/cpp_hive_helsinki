@@ -135,5 +135,19 @@ int main(void) {
 		}
 		std::cout << "____________________\n" << std::endl;
 	}
+	{
+		std::cout << "TEST 9:\n\n";
+		Span sp = Span(5);
+		sp.addNumber(0);
+		sp.addNumber(1);
+		sp.addNumber(2);
+		sp.addNumber(3);
+		sp.addNumber(4);
+		const Span const_sp(sp);
+		// const_sp.addNumber(0);
+		std::cout << "Shortest span: " << const_sp.shortestSpan() << std::endl;
+		std::cout << "Longest span: " << const_sp.longestSpan() << std::endl;
+		std::cout << "____________________\n\n" << std::endl;
+	}
 	return 0;
 }

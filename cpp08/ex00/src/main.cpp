@@ -59,10 +59,10 @@ int main(void) {
 	{
 		std::cout << "TEST 4 (std::array):\n";
 		std::array<int, 5> array = {0, 1, 2, 3, 4};
-		int &x = easyfind(array, 0);
+		int				  &x = easyfind(array, 0);
 		x = 10;
 		for (auto val : array)
-		std::cout << val << std::endl;
+			std::cout << val << std::endl;
 		try {
 			std::cout << "\nLooking for 10\n";
 			std::cout << easyfind(array, 10) << std::endl;
@@ -77,7 +77,7 @@ int main(void) {
 		// int &x = easyfind(array, 0);
 		// x = 10;
 		for (auto val : array)
-		std::cout << val << std::endl;
+			std::cout << val << std::endl;
 		try {
 			std::cout << "\nLooking for 10\n";
 			std::cout << easyfind(array, 10) << std::endl;
