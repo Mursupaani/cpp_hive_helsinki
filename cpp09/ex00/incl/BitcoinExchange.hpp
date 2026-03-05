@@ -2,14 +2,18 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <regex>
 #include <stdexcept>
 #include <string>
 
 class BitcoinExchange {
 	private:
-		static std::map<std::string, float> _data;
-		static constexpr float				_minValue = 0;
-		static constexpr float				_maxValue = 1000;
+		static std::map<std::string, double> _data;
+		static constexpr float				 _minValue = 0;
+		static constexpr float				 _maxValue = 1000;
+		static std::regex					 _dateRegex;
+
+		static void getDateAndValueFromDatabase(const std::string &line);
 
 	public:
 		BitcoinExchange(void) = delete;
