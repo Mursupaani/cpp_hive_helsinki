@@ -7,7 +7,7 @@ void RPN::calculate(const std::string &input) {
 		char current = input[i];
 		if (std::isdigit(current)) {
 			_stack.push(current - '0');
-		} else if (_symbols.find(current) != std::string::npos) {
+		} else if (_operators.find(current) != std::string::npos) {
 			if (_stack.size() < 2) {
 				throw(std::runtime_error("ERROR: Invalid input"));
 			}
@@ -36,11 +36,11 @@ void RPN::calculate(const std::string &input) {
 					_stack.top() /= operand;
 					break;
 			}
-		} else if (std::isspace(current))
+		} else
+			throw(std::runtime_error("ERROR: Invalid input"));
+		if (std::isspace(input[++i]) || input[i] == '\0')
 			continue;
 		else
-			throw(std::runtime_error("ERROR: Invalid input"));
-		if (i + 1 < input.length() && std::isspace(input[i + 1]) == 0)
 			throw(std::runtime_error("ERROR: Invalid input"));
 	}
 	if (_stack.size() != 1)
