@@ -4,7 +4,7 @@ std::stack<int> RPN::_stack;
 
 void RPN::calculate(const std::string &input) {
 	for (size_t i = 0; i < input.length(); ++i) {
-		char current = input[i];
+		unsigned char current = input[i];
 		if (std::isdigit(current)) {
 			_stack.push(current - '0');
 		} else if (_operators.find(current) != std::string::npos) {
