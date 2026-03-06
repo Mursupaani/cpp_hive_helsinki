@@ -30,6 +30,8 @@ void RPN::calculate(const std::string &input) {
 					break;
 				case '/':
 					operand = _stack.top();
+					if (operand == 0)
+						throw(std::runtime_error("ERROR: Division by zero"));
 					_stack.pop();
 					_stack.top() /= operand;
 					break;
