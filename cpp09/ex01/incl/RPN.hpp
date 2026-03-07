@@ -5,8 +5,7 @@
 
 class RPN {
 	private:
-		static constexpr std::string _operators = "+-*/";
-		static std::stack<int>		 _stack;
+		static std::stack<int> _stack;
 
 	public:
 		RPN(void) = delete;

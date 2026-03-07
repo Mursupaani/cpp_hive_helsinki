@@ -1,10 +1,10 @@
 #include "BitcoinExchange.hpp"
 
-std::map<std::string, double> BitcoinExchange::_data;
-std::regex					  BitcoinExchange::_dateRegex(
-	   "[2-9]\\d{3}-(0\\d{1}|1[0-2])-([0-2]\\d|3[0-1])");
+std::regex BitcoinExchange::_dateRegex(
+	"[2-9]\\d{3}-(0\\d{1}|1[0-2])-([0-2]\\d|3[0-1])");
 std::regex BitcoinExchange::_validInput(
 	"^[2-9]\\d{3}-(0\\d|1[0-2])-[0-3]\\d\\s\\|\\s\\d+(\\.\\d+)?$");
+std::map<std::string, double> BitcoinExchange::_data;
 
 void BitcoinExchange::loadDataFromCSVLine(const std::string &line) {
 	std::string date = line.substr(0, 10);
