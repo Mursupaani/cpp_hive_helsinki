@@ -10,10 +10,17 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <exception>
+
 #include "PmergeMe.hpp"
 
 int main(int ac, char **av) {
-	if (ac != 2)
+	if (ac == 1)
 		return (1);
-	(void)av[1];
+	try {
+		PmergeMe::vectorSort(ac, av);
+		std::cout << "Vector took " << PmergeMe::getVDuration() << std::endl;
+	} catch (std::exception &e) {
+		std::cerr << e.what() << std::endl;
+	}
 }
