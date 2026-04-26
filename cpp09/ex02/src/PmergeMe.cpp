@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <cstddef>
+#include <iterator>
 
 std::vector<std::vector<int>> PmergeMe::_vMain;
 std::vector<std::vector<int>> PmergeMe::_vPend;
@@ -37,12 +38,14 @@ unsigned int PmergeMe::getJacobstahlInIndex(unsigned int j) {
 void PmergeMe::vectorSort(const int ac, char **av) {
 	PmergeMe::Timer timer(_vDuration);
 	loadInputToVector(ac, av);
-	std::cout << "\nBefore sort:\n";
-	std::cout << "\nMain:\n";
-	printContainer(_vMain);
-	std::cout << "\nNon participating:\n";
-	printContainer(_vPend);
-	std::cout << "\n______________________________\n";
+	{
+		std::cout << "\nBefore sort:\n";
+		std::cout << "\nMain:\n";
+		printContainer(_vMain);
+		std::cout << "\nNon participating:\n";
+		printContainer(_vPend);
+		std::cout << "\n______________________________\n";
+	}
 	vectorSortRecursion();
 }
 
@@ -65,20 +68,24 @@ void PmergeMe::vectorSortRecursion(void) {
 		vectorSortJacobstahl();
 		return;
 	}
-	for (size_t i = 0; i < _vMain.size(); ++i) {
-		if (_vMain[i + 1].size() == pow(2, _vDepth)) {
-			if (*_vMain[i].rbegin() < *_vMain[i + 1].rbegin()) {
-				_vMain[i].insert(_vMain[i].end(), _vMain[i + 1].begin(),
-								 _vMain[i + 1].end());
-				_vMain.erase(_vMain.begin() + i + 1);
-			} else {
-				_vMain[i + 1].insert(_vMain[i + 1].end(), _vMain[i].begin(),
-									 _vMain[i].end());
-				_vMain.erase(_vMain.begin() + i);
+	auto it = _vMain.begin();
+	while (it != _vMain.end()) {
+		if ((it + 1) != _vMain.end()) {
+			auto nextIt = it + 1;
+			if (nextIt->size() == std::pow(2, _vDepth)) {
+				if (*it->rbegin() < *nextIt->rbegin()) {
+					it->insert(it->end(), nextIt->begin(), nextIt->end());
+					_vMain.erase(nextIt);
+					++it;
+				} else {
+					nextIt->insert(nextIt->end(), it->begin(), it->end());
+					it = _vMain.erase(it);
+					++it;
+				}
 			}
 		} else {
-			_vNonParticipating.push_back(_vMain[i]);
-			_vMain.erase(_vMain.begin() + i);
+			_vNonParticipating.push_back(std::move(*it));
+			it = _vMain.erase(it);
 		}
 	}
 	{
@@ -98,21 +105,39 @@ void PmergeMe::vectorSortRecursion(void) {
 void PmergeMe::vectorSortJacobstahl(void) {
 	if (_vDepth < 0)
 		return;
-	if ((*_vNonParticipating.rbegin()).size() == pow(2, _vDepth)) {
-		_vPend.push_back(*_vNonParticipating.rbegin());
-		_vNonParticipating.erase(_vNonParticipating.end() - 1);
-	}
-	size_t setSize = pow(2, _vDepth);
-	for (int i = 0; static_cast<size_t>(i) < _vMain.size(); ++i) {
-		if (_vMain[i].size() == 2 * setSize) {
-			std::vector<int> v;
-			for (size_t j = 0; j < setSize; ++j) {
-				v.push_back(_vMain[i][0]);
-				_vMain[i].erase(_vMain[i].begin());
-			}
-			_vMain.insert(_vMain.cend(), v);
+	if (_vNonParticipating.size() > 0) {
+		auto nonPartIt = _vNonParticipating.rbegin();
+		if (nonPartIt->size() == pow(2, _vDepth)) {
+			_vPend.push_back(std::move(*nonPartIt));
+			_vNonParticipating.pop_back();
 		}
 	}
+	size_t setSize = pow(2, _vDepth);
+	auto   mainIt = _vMain.begin();
+	while (mainIt != _vMain.end()) {
+		if (mainIt->size() == 2 * setSize) {
+			std::vector<int> v{};
+			auto			 it = mainIt->rbegin();
+			while (it != mainIt->rend()) {
+				v.push_back(*it);
+				++it;
+			}
+			mainIt = _vMain.erase(mainIt);
+			for (auto e : v) {
+				std::cout << e << std::endl;
+			}
+		}
+	}
+	// for (size_t i = 0; i < _vMain.size(); ++i) {
+	// 	if (_vMain[i].size() == 2 * setSize) {
+	// 		std::vector<int> v;
+	// 		for (size_t j = 0; j < setSize; ++j) {
+	// 			v.push_back(_vMain[i][0]);
+	// 			_vMain[i].erase(_vMain[i].begin());
+	// 		}
+	// 		_vMain.insert(_vMain.cend(), v);
+	// 	}
+	// }
 	{
 		std::cout << "\nDepth: " << _vDepth << std::endl;
 		std::cout << "\nMain (size " << _vMain.size() << "):\n";
@@ -157,11 +182,9 @@ PmergeMe::Timer::~Timer(void) {
 // 			validateElement(av[i + 1]);
 // 			while (++i < ac) {
 // 				b = std::stoi(av[i]);
-// 				duplicateFound = duplicateFoundInContainer(_vMain, b) || a == b;
-// 				if (duplicateFound)
-// 					continue;
-// 				else
-// 					break;
+// 				duplicateFound = duplicateFoundInContainer(_vMain, b) || a
+// == b; 				if (duplicateFound) 					continue;
+// else 					break;
 // 			}
 // 			if (duplicateFound == false) {
 // 				v.push_back(std::min(a, b));

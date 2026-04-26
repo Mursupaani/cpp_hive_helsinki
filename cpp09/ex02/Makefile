@@ -13,7 +13,7 @@ OBJ_FILES	= $(CPP_FILES:%.cpp=%.o)
 OBJS		= $(addprefix $(OBJ_DIR), $(OBJ_FILES))
 DEP			= $(OBJS:%.o=%.d)
 
-CPP_FLAGS	= -Wall -Wextra -Werror -std=c++17 -I$(INCL_DIR) -g
+CPP_FLAGS	= -Wall -Wextra -Werror -std=c++20 -I$(INCL_DIR) -g
 DEP_FLAGS	= -MMD -MP
 
 all: $(NAME)
