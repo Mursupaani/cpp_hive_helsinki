@@ -1,6 +1,6 @@
 NAME		= PmergeMe
 
-INCL_DIR	= ./incl/
+INCL_DIR	= ./include/
 HPP_FILES	= PmergeMe.hpp
 INCLS		= $(addprefix $(INCL_DIR), $(HPP_FILES))
 

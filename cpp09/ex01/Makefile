@@ -1,6 +1,6 @@
 NAME		= RPN
 
-INCL_DIR	= ./incl/
+INCL_DIR	= ./include/
 HPP_FILES	= RPN.hpp
 INCLS		= $(addprefix $(INCL_DIR), $(HPP_FILES))
 

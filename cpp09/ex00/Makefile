@@ -1,6 +1,6 @@
 NAME		= btc
 
-INCL_DIR	= ./incl/
+INCL_DIR	= ./include/
 HPP_FILES	= BitcoinExchange.hpp
 INCLS		= $(addprefix $(INCL_DIR), $(HPP_FILES))
 
