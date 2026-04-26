@@ -10,8 +10,6 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <exception>
-
 #include "PmergeMe.hpp"
 
 int main(int ac, char **av) {
@@ -19,7 +17,8 @@ int main(int ac, char **av) {
 		return (1);
 	try {
 		PmergeMe::vectorSort(ac, av);
-		std::cout << "Vector took " << PmergeMe::getVDuration() << std::endl;
+		std::cout << "Vector took " << PmergeMe::getVDuration().count() * 1000
+				  << "ms" << std::endl;
 	} catch (std::exception &e) {
 		std::cerr << e.what() << std::endl;
 	}
