@@ -11,24 +11,24 @@
 class PmergeMe {
 	private:
 		// Vector:
-		static std::vector<std::vector<int>> _vMain;
-		static std::vector<std::vector<int>> _vPend;
-		static std::vector<std::vector<int>> _vNonParticipating;
-		static std::vector<std::vector<int>> _vOdd;
-		static std::chrono::duration<float>	 _vDuration;
-		static int							 _vDepth;
+		static std::vector<std::vector<int>> _vecMain;
+		static std::vector<std::vector<int>> _vecPend;
+		static std::vector<std::vector<int>> _vecNonPart;
+		static std::vector<std::vector<int>> _vecOdd;
+		static std::chrono::duration<float>	 _vecDuration;
+		static int							 _vecDepth;
 
 		static void loadInputToVector(const int ac, char **av);
 		static void vectorSortRecursion(void);
 		static void vectorSortJacobstahl(void);
 
 		// Deque:
-		static std::deque<std::deque<int>>	 _dMain;
-		static std::deque<std::deque<int>>	 _dPend;
-		static std::vector<std::vector<int>> _dNonParticipating;
-		static std::deque<std::deque<int>>	 _dOdd;
-		static std::chrono::duration<float>	 _dDuration;
-		static int							 _dDepth;
+		static std::deque<std::deque<int>>	 _deqMain;
+		static std::deque<std::deque<int>>	 _deqPend;
+		static std::vector<std::vector<int>> _deqNonPart;
+		static std::deque<std::deque<int>>	 _deqOdd;
+		static std::chrono::duration<float>	 _deqDuration;
+		static int							 _deqDepth;
 
 		// Generic:
 		static void validateElement(char *elem);
@@ -42,7 +42,9 @@ class PmergeMe {
 		static void							vectorSort(const int ac, char **av);
 		static std::chrono::duration<float> getVDuration(void);
 		static std::chrono::duration<float> getDDuration(void);
-		static unsigned int getJacobstahlInIndex(unsigned int j);
+		static unsigned int		   getJacobstahlInIndex(unsigned int j);
+		static std::vector<size_t> buildJacobstahlSequence(
+			const size_t pendSize);
 
 		class Timer {
 			private:
