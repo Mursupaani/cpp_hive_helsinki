@@ -19,6 +19,41 @@ std::vector<std::vector<int>> PmergeMe::_deqNonPart{};
 std::chrono::duration<float>  PmergeMe::_deqDuration{};
 int							  PmergeMe::_deqDepth{};
 
+// FIXME: Debug printing:
+template <typename T>
+static void printPend(T pend, std::vector<size_t> order) {
+	for (size_t i = 0; i < pend.size(); ++i) {
+		std::cout << std::setw(3) << std::right;
+		std::cout << i << ": | ";
+		for (const auto &e : pend[i]) {
+			std::cout << e << " | ";
+		}
+		std::cout << "\tJ: " << order[i] << std::endl;
+	}
+}
+
+template <typename T>
+static void printState(T main, T nonPart, T pend, int recDepth,
+					   bool printRecDepth, std::vector<size_t> *insertOrder) {
+	{
+		if (printRecDepth) {
+			std::cout << "Recursion depth: " << recDepth << std::endl;
+		}
+		std::cout << "\nMain ( size: " << main.size() << " ) :\n";
+		PmergeMe::printContainer(main);
+		std::cout << "\nNon Participating ( size: " << nonPart.size()
+				  << " ) :\n";
+		PmergeMe::printContainer(nonPart);
+		std::cout << "\nPending ( size: " << pend.size() << " ) :\n";
+		if (insertOrder) {
+			printPend(pend, *insertOrder);
+		} else {
+			PmergeMe::printContainer(pend);
+		}
+		std::cout << "\n______________________________\n";
+	}
+}
+
 // NOTE: Generic helper methods:
 void PmergeMe::validateElement(char *elem) {
 	for (int i = 0; elem[i]; ++i) {
@@ -62,12 +97,8 @@ void PmergeMe::vectorSort(const int ac, char **av) {
 	PmergeMe::Timer timer(_vecDuration);
 	loadInputToVector(ac, av);
 	{
-		std::cout << "\nBefore sort:\n";
-		std::cout << "\nMain:\n";
-		printContainer(_vecMain);
-		std::cout << "\nNon participating:\n";
-		printContainer(_vecPend);
-		std::cout << "\n______________________________\n";
+		std::cout << "Before sorting:\n";
+		printState(_vecMain, _vecNonPart, _vecPend, _vecDepth, false, nullptr);
 	}
 	vectorSortRecursion();
 }
@@ -110,22 +141,12 @@ void PmergeMe::vectorSortRecursion(void) {
 			mainIt = _vecMain.erase(mainIt);
 		}
 	}
-	{
-		std::cout << "Recursion depth: " << _vecDepth << std::endl;
-		std::cout << "\nAfter sort:\n";
-		std::cout << "size: " << _vecMain.size() << std::endl;
-		std::cout << "\nMain:\n";
-		printContainer(_vecMain);
-		std::cout << "\nNon participating:\n";
-		printContainer(_vecNonPart);
-		std::cout << "\n______________________________\n";
-	}
+	{ printState(_vecMain, _vecNonPart, _vecPend, _vecDepth, true, nullptr); }
 	++_vecDepth;
 	vectorSortRecursion();
 }
 
 void PmergeMe::vectorSortJacobstahl(void) {
-	std::cout << "\nDepth: " << _vecDepth << std::endl;
 	if (_vecDepth < 0)
 		return;
 	size_t setSize = pow(2, _vecDepth);
@@ -145,7 +166,6 @@ void PmergeMe::vectorSortJacobstahl(void) {
 		}
 	}
 	_vecMain = std::move(newMain);
-	std::cout << "main size: " << _vecMain.size() << std::endl;
 
 	// INFO: Generate _vecPend from _vecMain.
 	auto bVecIt = _vecMain.begin() + 2;
@@ -167,33 +187,38 @@ void PmergeMe::vectorSortJacobstahl(void) {
 			_vecNonPart.pop_back();
 		}
 	}
+	std::vector<size_t> insertOrder = buildJacobstahlSequence(_vecPend.size());
+	{
+		std::cout << "\nBefore sorting:\n";
+		printState(_vecMain, _vecNonPart, _vecPend, _vecDepth, true,
+				   &insertOrder);
+	}
 
 	// INFO: If an element in _vecNonPart matches the size of current set
-	std::vector<size_t> insertOrder = buildJacobstahlSequence(_vecPend.size());
-	size_t				addedCount{};
+	size_t addedCount{};
 	for (auto idx : insertOrder) {
 		size_t limit = idx + addedCount + 2;
-		std::cout << "limit: " << limit << std::endl;
-		auto pendIt = _vecPend.begin() + idx;
-		auto searchRangeEnd = _vecMain.begin() + limit;
-		auto insertPos = std::upper_bound(
-			_vecMain.begin(), searchRangeEnd, *pendIt,
-			[](const std::vector<int> &a, const std::vector<int> &b) {
-				return (a.back() < b.back());
-			});
+		auto   pendIt = _vecPend.begin() + idx;
+		auto   searchRangeEnd = _vecMain.begin() + limit;
+		auto   insertPos = std::upper_bound(
+			  _vecMain.begin(), searchRangeEnd, *pendIt,
+			  [](const std::vector<int> &a, const std::vector<int> &b) {
+				  return (a.back() < b.back());
+			  });
 		_vecMain.insert(insertPos, *pendIt);
+		for (auto e : *pendIt) {
+			std::cout << " | " << e;
+		}
+		std::cout << " | limit: " << limit << std::endl;
 		++addedCount;
 	}
 	_vecPend.erase(_vecPend.begin(), _vecPend.end());
 	{
-		std::cout << "\nMain (size " << _vecMain.size() << "):\n";
-		printContainer(_vecMain);
-		std::cout << "\nPend:\n";
-		printContainer(_vecPend);
-		std::cout << "\nNon participating:\n";
-		printContainer(_vecNonPart);
+		std::cout << "\nAfter sorting:\n";
+		printState(_vecMain, _vecNonPart, _vecPend, _vecDepth, true, nullptr);
 		std::cout << "\n______________________________\n";
 	}
+
 	--_vecDepth;
 	vectorSortJacobstahl();
 }
