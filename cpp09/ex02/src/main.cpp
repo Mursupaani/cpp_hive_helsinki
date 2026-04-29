@@ -28,8 +28,8 @@ int main(int ac, char **av) {
 		return (1);
 	}
 	try {
-		std::vector<std::vector<int>> sortedVec = PmergeMe::vectorSort(ac, av);
-		std::deque<std::deque<int>>	  sortedDeq = PmergeMe::dequeSort(ac, av);
+		std::vector<std::vector<int>> sortedVec = PmergeMe::sortVector(ac, av);
+		std::deque<std::deque<int>>	  sortedDeq = PmergeMe::sortDeque(ac, av);
 		PmergeMe::printResults(ac, av, sortedVec);
 	} catch (std::exception &e) {
 		std::cerr << e.what() << std::endl;

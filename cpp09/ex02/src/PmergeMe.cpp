@@ -9,15 +9,15 @@
 std::chrono::duration<float> PmergeMe::_vecDuration{};
 std::chrono::duration<float> PmergeMe::_deqDuration{};
 size_t						 PmergeMe::_numOfElems{};
+size_t						 PmergeMe::_numOfDupes{};
 
 // NOTE: Generic helper methods:
 void PmergeMe::validateInputNumbers(const int ac, char **av) {
 	for (int i = 1; i < ac; ++i) {
 		for (int j = 0; av[i][j]; ++j) {
 			if (!std::isdigit(av[i][j])) {
-				std::string error =
-					"Error: Invalid input '" + std::string(av[i]) + "'";
-				throw std::runtime_error(error);
+				throw std::runtime_error("Error: Invalid input '" +
+										 std::string(av[i]) + "'");
 			}
 		}
 	}
@@ -25,6 +25,10 @@ void PmergeMe::validateInputNumbers(const int ac, char **av) {
 
 size_t PmergeMe::getNumOfElements(void) {
 	return (_numOfElems);
+}
+
+size_t PmergeMe::getNumOfDupes(void) {
+	return (_numOfDupes);
 }
 
 // NOTE: Jacobstahl generation:
@@ -37,7 +41,7 @@ unsigned int PmergeMe::getJacobstahlInIndex(unsigned int i) {
 }
 
 // NOTE: Vector sort:
-std::vector<std::vector<int>> PmergeMe::vectorSort(const int ac, char **av) {
+std::vector<std::vector<int>> PmergeMe::sortVector(const int ac, char **av) {
 	PmergeMe::Timer				  timer(_vecDuration);
 	std::vector<std::vector<int>> pend{};
 	std::vector<std::vector<int>> main{};
@@ -49,7 +53,7 @@ std::vector<std::vector<int>> PmergeMe::vectorSort(const int ac, char **av) {
 }
 
 // NOTE: Deque sort:
-std::deque<std::deque<int>> PmergeMe::dequeSort(const int ac, char **av) {
+std::deque<std::deque<int>> PmergeMe::sortDeque(const int ac, char **av) {
 	PmergeMe::Timer				timer(_deqDuration);
 	std::deque<std::deque<int>> pend{};
 	std::deque<std::deque<int>> main{};

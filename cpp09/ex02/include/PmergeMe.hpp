@@ -9,6 +9,7 @@
 #include <iostream>
 #include <limits>
 #include <ratio>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -19,14 +20,14 @@ class PmergeMe {
 		PmergeMe &operator=(const PmergeMe &other) = delete;
 		~PmergeMe(void) = delete;
 
-		static std::vector<std::vector<int>> vectorSort(const int ac,
+		static std::vector<std::vector<int>> sortVector(const int ac,
 														char	**av);
-		static std::deque<std::deque<int>>	 dequeSort(const int ac, char **av);
+		static std::deque<std::deque<int>>	 sortDeque(const int ac, char **av);
 		static std::chrono::duration<float>	 getVDuration(void);
 		static std::chrono::duration<float>	 getDDuration(void);
 		static size_t						 getNumOfElements(void);
+		static size_t						 getNumOfDupes(void);
 		static void validateInputNumbers(const int ac, char **av);
-		static void printResults(std::vector<std::vector<int>> &sortedVec);
 
 		template <typename ContCont>
 		static void printResults(int ac, char **av,
@@ -40,11 +41,15 @@ class PmergeMe {
 			}
 			std::cout << "\nAfter:\t";
 			printContainer(sortedCont);
+			if (_numOfDupes > 0) {
+				std::cout << "\nRemoved " << _numOfDupes
+						  << " duplicate(s) from input";
+			}
 			std::cout << "\nTime to process a range of " << _numOfElems
-					  << " elements with std::vector\t: "
+					  << " elements with std::vector : "
 					  << PmergeMe::getVDuration().count() * 1000 << " ms";
 			std::cout << "\nTime to process a range of " << _numOfElems
-					  << " elements with std::deque\t: "
+					  << " elements with std::deque  : "
 					  << PmergeMe::getDDuration().count() * 1000 << " ms";
 			std::cout << std::endl;
 		}
@@ -52,7 +57,8 @@ class PmergeMe {
 		class Timer {
 			private:
 				std::chrono::duration<float>					  &_duration;
-				std::chrono::time_point<std::chrono::steady_clock> _start, _end;
+				std::chrono::time_point<std::chrono::steady_clock> _start;
+				std::chrono::time_point<std::chrono::steady_clock> _end;
 
 			public:
 				Timer() = delete;
@@ -66,6 +72,7 @@ class PmergeMe {
 		static std::chrono::duration<float> _vecDuration;
 		static std::chrono::duration<float> _deqDuration;
 		static size_t						_numOfElems;
+		static size_t						_numOfDupes;
 
 		static unsigned int getJacobstahlInIndex(unsigned int j);
 
@@ -99,17 +106,26 @@ class PmergeMe {
 
 		template <typename ContCont, typename Cont>
 		static size_t loadInput(const int ac, char **av, ContCont &main) {
+			size_t numOfDupes{};
 			size_t numOfElements{};
-			int	   a;
 			for (int i = 1; i < ac; ++i) {
-				Cont v;
-				a = std::stoi(av[i]);
-				if (duplicateFoundInContainer(main, a))
+				int a;
+				try {
+					a = std::stoi(av[i]);
+				} catch (std::out_of_range &e) {
+					throw std::runtime_error("Error: '" + std::string(av[i]) +
+											 "' out of range");
+				}
+				if (duplicateFoundInContainer(main, a)) {
+					++numOfDupes;
 					continue;
+				}
+				Cont v;
 				v.push_back(a);
 				main.push_back(v);
 				++numOfElements;
 			}
+			_numOfDupes = numOfDupes;
 			return (numOfElements);
 		}
 
