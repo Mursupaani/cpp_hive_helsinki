@@ -41,10 +41,10 @@ class PmergeMe {
 			std::cout << "\nAfter:\t";
 			printContainer(sortedCont);
 			std::cout << "\nTime to process a range of " << _numOfElems
-					  << " elements with std::vector : "
+					  << " elements with std::vector\t: "
 					  << PmergeMe::getVDuration().count() * 1000 << " ms";
 			std::cout << "\nTime to process a range of " << _numOfElems
-					  << " elements with std::deque : "
+					  << " elements with std::deque\t: "
 					  << PmergeMe::getDDuration().count() * 1000 << " ms";
 			std::cout << std::endl;
 		}

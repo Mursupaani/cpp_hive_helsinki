@@ -14,8 +14,11 @@ size_t						 PmergeMe::_numOfElems{};
 void PmergeMe::validateInputNumbers(const int ac, char **av) {
 	for (int i = 1; i < ac; ++i) {
 		for (int j = 0; av[i][j]; ++j) {
-			if (!std::isdigit(av[i][j]))
-				throw std::runtime_error("Invalid input " + std::string(av[i]));
+			if (!std::isdigit(av[i][j])) {
+				std::string error =
+					"Error: Invalid input '" + std::string(av[i]) + "'";
+				throw std::runtime_error(error);
+			}
 		}
 	}
 }
