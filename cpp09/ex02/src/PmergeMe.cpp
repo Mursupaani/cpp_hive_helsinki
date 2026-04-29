@@ -1,5 +1,6 @@
 #include "PmergeMe.hpp"
 
+#include <climits>
 #include <cmath>
 #include <cstddef>
 #include <deque>
@@ -7,6 +8,7 @@
 
 std::chrono::duration<float> PmergeMe::_vecDuration{};
 std::chrono::duration<float> PmergeMe::_deqDuration{};
+size_t						 PmergeMe::_numOfElems{};
 
 // NOTE: Generic helper methods:
 void PmergeMe::validateInputNumbers(const int ac, char **av) {
@@ -16,6 +18,10 @@ void PmergeMe::validateInputNumbers(const int ac, char **av) {
 				throw std::runtime_error("Invalid input " + std::string(av[i]));
 		}
 	}
+}
+
+size_t PmergeMe::getNumOfElements(void) {
+	return (_numOfElems);
 }
 
 // NOTE: Jacobstahl generation:
@@ -28,26 +34,26 @@ unsigned int PmergeMe::getJacobstahlInIndex(unsigned int i) {
 }
 
 // NOTE: Vector sort:
-void PmergeMe::vectorSort(const int ac, char **av) {
+std::vector<std::vector<int>> PmergeMe::vectorSort(const int ac, char **av) {
 	PmergeMe::Timer				  timer(_vecDuration);
-	std::vector<std::vector<int>> nonPart{};
 	std::vector<std::vector<int>> pend{};
-	std::vector<std::vector<int>> main =
-		loadInput<std::vector<std::vector<int>>, std::vector<int>>(ac, av);
+	std::vector<std::vector<int>> main{};
+	_numOfElems = loadInput<std::vector<std::vector<int>>, std::vector<int>>(
+		ac, av, main);
 	SortRecursion<std::vector<std::vector<int>>, std::vector<int>>(main, pend,
 																   0);
-	printContainer(main);
+	return (main);
 }
 
 // NOTE: Deque sort:
-void PmergeMe::dequeSort(const int ac, char **av) {
+std::deque<std::deque<int>> PmergeMe::dequeSort(const int ac, char **av) {
 	PmergeMe::Timer				timer(_deqDuration);
-	std::deque<std::deque<int>> nonPart{};
 	std::deque<std::deque<int>> pend{};
-	std::deque<std::deque<int>> main =
-		loadInput<std::deque<std::deque<int>>, std::deque<int>>(ac, av);
+	std::deque<std::deque<int>> main{};
+	_numOfElems =
+		loadInput<std::deque<std::deque<int>>, std::deque<int>>(ac, av, main);
 	SortRecursion<std::deque<std::deque<int>>, std::deque<int>>(main, pend, 0);
-	printContainer(main);
+	return (main);
 }
 
 // NOTE: PmergeMe::Timer:

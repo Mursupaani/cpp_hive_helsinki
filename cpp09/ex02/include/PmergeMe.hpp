@@ -2,60 +2,105 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <cstddef>
 #include <deque>
 #include <exception>
 #include <iomanip>
 #include <iostream>
+#include <limits>
 #include <ratio>
 #include <string>
 #include <vector>
 
 class PmergeMe {
+	public:
+		PmergeMe(void) = delete;
+		PmergeMe(const PmergeMe &other) = delete;
+		PmergeMe &operator=(const PmergeMe &other) = delete;
+		~PmergeMe(void) = delete;
+
+		static std::vector<std::vector<int>> vectorSort(const int ac,
+														char	**av);
+		static std::deque<std::deque<int>>	 dequeSort(const int ac, char **av);
+		static std::chrono::duration<float>	 getVDuration(void);
+		static std::chrono::duration<float>	 getDDuration(void);
+		static size_t						 getNumOfElements(void);
+		static void validateInputNumbers(const int ac, char **av);
+		static void printResults(std::vector<std::vector<int>> &sortedVec);
+
+		template <typename ContCont>
+		static void printResults(int ac, char **av,
+								 const ContCont &sortedCont) {
+			std::cout << "Before:\t";
+			for (int i = 1; i < ac; ++i) {
+				std::cout << av[i];
+				if (i < ac - 1) {
+					std::cout << " ";
+				}
+			}
+			std::cout << "\nAfter:\t";
+			printContainer(sortedCont);
+			std::cout << "\nTime to process a range of " << _numOfElems
+					  << " elements with std::vector : "
+					  << PmergeMe::getVDuration().count() * 1000 << " ms";
+			std::cout << "\nTime to process a range of " << _numOfElems
+					  << " elements with std::deque : "
+					  << PmergeMe::getDDuration().count() * 1000 << " ms";
+			std::cout << std::endl;
+		}
+
+		class Timer {
+			private:
+				std::chrono::duration<float>					  &_duration;
+				std::chrono::time_point<std::chrono::steady_clock> _start, _end;
+
+			public:
+				Timer() = delete;
+				Timer(std::chrono::duration<float> &duration);
+				Timer(const PmergeMe::Timer &other) = delete;
+				Timer &operator=(const PmergeMe::Timer &other) = delete;
+				~Timer();
+		};
+
 	private:
-		// FIXME: Debug printing:
-		template <typename ContCont, typename Cont>
-		static void printPend(ContCont pend, Cont order) {
-			for (size_t i = 0; i < pend.size(); ++i) {
-				std::cout << std::setw(3) << std::right;
-				std::cout << i << ": | ";
-				for (const auto &e : pend[i]) {
-					std::cout << e << " | ";
-				}
-				std::cout << "\tJ: " << order[i] << std::endl;
-			}
-		}
-
-		template <typename ContCont, typename Cont>
-		static void printState(ContCont main, ContCont nonPart, ContCont pend,
-							   int recDepth, bool printRecDepth,
-							   Cont *insertOrder) {
-			{
-				if (printRecDepth) {
-					std::cout << "Recursion depth: " << recDepth << std::endl;
-				}
-				std::cout << "\nMain ( size: " << main.size() << " ) :\n";
-				PmergeMe::printContainer(main);
-				std::cout << "\nNon Participating ( size: " << nonPart.size()
-						  << " ) :\n";
-				PmergeMe::printContainer(nonPart);
-				std::cout << "\nPending ( size: " << pend.size() << " ) :\n";
-				if (insertOrder) {
-					printPend(pend, *insertOrder);
-				} else {
-					PmergeMe::printContainer(pend);
-				}
-				std::cout << "\n______________________________\n";
-			}
-		}
-		// FIXME: Remove above^^
-
 		static std::chrono::duration<float> _vecDuration;
 		static std::chrono::duration<float> _deqDuration;
+		static size_t						_numOfElems;
+
+		static unsigned int getJacobstahlInIndex(unsigned int j);
+
+		template <typename ContCont>
+		static bool duplicateFoundInContainer(const ContCont &container,
+											  const int		  elem) {
+			if (container.size() == 0)
+				return (false);
+			for (const auto &container : container) {
+				for (const auto &containerElem : container) {
+					if (elem == containerElem) {
+						return (true);
+					}
+				}
+			}
+			return (false);
+		}
+
+		template <typename ContCont>
+		static void printContainer(const ContCont &container) {
+			auto mainIt = container.begin();
+			for (; mainIt != container.end(); ++mainIt) {
+				auto it = mainIt->begin();
+				for (; it != mainIt->end(); ++it) {
+					std::cout << *it;
+					if (mainIt + 1 != container.end())
+						std::cout << " ";
+				}
+			}
+		}
 
 		template <typename ContCont, typename Cont>
-		static ContCont loadInput(const int ac, char **av) {
-			int		 a;
-			ContCont main{};
+		static size_t loadInput(const int ac, char **av, ContCont &main) {
+			size_t numOfElements{};
+			int	   a;
 			for (int i = 1; i < ac; ++i) {
 				Cont v;
 				a = std::stoi(av[i]);
@@ -63,8 +108,9 @@ class PmergeMe {
 					continue;
 				v.push_back(a);
 				main.push_back(v);
+				++numOfElements;
 			}
-			return (main);
+			return (numOfElements);
 		}
 
 		template <typename ContCont, typename Cont>
@@ -105,7 +151,6 @@ class PmergeMe {
 			ContCont pend{};
 			size_t	 setSize = std::pow(2, recursionDepth);
 
-			// INFO: Create new main from split parts
 			ContCont newMain{};
 			{
 				for (auto &innerVec : main) {
@@ -119,9 +164,8 @@ class PmergeMe {
 					}
 				}
 			}
-			main = std::move(newMain);
+			main = newMain;
 
-			// INFO: Generate vecPend from main.
 			auto bVecIt = main.begin() + 2;
 			while (bVecIt != main.end()) {
 				pend.insert(pend.end(), *bVecIt);
@@ -132,19 +176,15 @@ class PmergeMe {
 				++bVecIt;
 			}
 
-			// INFO: If an element in nonPart matches the size of current
-			// set add it to pend.
 			if (nonPart.size() > 0) {
 				auto nonPartIt = nonPart.rbegin();
 				if (nonPartIt->size() == setSize) {
-					pend.push_back(std::move(*nonPartIt));
+					pend.push_back(*nonPartIt);
 					nonPart.pop_back();
 				}
 			}
 			Cont insertOrder = buildJacobstahlSequence<Cont>(pend.size());
 
-			// INFO: If an element in nonPart matches the size of current
-			// set
 			size_t addedCount{};
 			for (auto idx : insertOrder) {
 				size_t limit = idx + addedCount + 2;
@@ -182,61 +222,5 @@ class PmergeMe {
 				prevJacob = curJacob;
 			}
 			return (sequence);
-		}
-
-		// INFO: Generic:
-
-	public:
-		PmergeMe(void) = delete;
-		PmergeMe(const PmergeMe &other) = delete;
-		PmergeMe &operator=(const PmergeMe &other) = delete;
-		~PmergeMe(void) = delete;
-
-		static void							vectorSort(const int ac, char **av);
-		static void							dequeSort(const int ac, char **av);
-		static std::chrono::duration<float> getVDuration(void);
-		static std::chrono::duration<float> getDDuration(void);
-		static unsigned int getJacobstahlInIndex(unsigned int j);
-		static void			validateInputNumbers(const int ac, char **av);
-
-		class Timer {
-			private:
-				std::chrono::duration<float>					  &_duration;
-				std::chrono::time_point<std::chrono::steady_clock> _start, _end;
-
-			public:
-				Timer() = delete;
-				Timer(std::chrono::duration<float> &duration);
-				Timer(const PmergeMe::Timer &other) = delete;
-				Timer &operator=(const PmergeMe::Timer &other) = delete;
-				~Timer();
-		};
-
-		template <typename ContCont>
-		static bool duplicateFoundInContainer(const ContCont &container,
-											  const int		  elem) {
-			if (container.size() == 0)
-				return (false);
-			for (const auto &container : container) {
-				for (const auto &containerElem : container) {
-					if (elem == containerElem) {
-						return (true);
-					}
-				}
-			}
-			return (false);
-		}
-
-		template <typename T>
-		static void printContainer(T container) {
-			int i = 0;
-			for (const auto &elem : container) {
-				std::cout << std::setw(3) << std::right;
-				std::cout << i++ << ": | ";
-				for (const auto &e : elem) {
-					std::cout << e << " | ";
-				}
-				std::cout << std::endl;
-			}
 		}
 };

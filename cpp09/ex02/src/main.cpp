@@ -10,7 +10,9 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <deque>
 #include <exception>
+#include <vector>
 
 #include "PmergeMe.hpp"
 
@@ -26,12 +28,10 @@ int main(int ac, char **av) {
 		return (1);
 	}
 	try {
-		PmergeMe::vectorSort(ac, av);
-		std::cout << "Vector took " << PmergeMe::getVDuration().count() * 1000
-				  << "ms" << std::endl;
-		PmergeMe::dequeSort(ac, av);
-		std::cout << "Deque took " << PmergeMe::getDDuration().count() * 1000
-				  << "ms" << std::endl;
+		std::vector<std::vector<int>> sortedVec = PmergeMe::vectorSort(ac, av);
+		std::deque<std::deque<int>>	  sortedDeq = PmergeMe::dequeSort(ac, av);
+		PmergeMe::printResults(ac, av, sortedDeq);
+		// PmergeMe::printResults(sortedVec);
 	} catch (std::exception &e) {
 		std::cerr << e.what() << std::endl;
 		return (1);
