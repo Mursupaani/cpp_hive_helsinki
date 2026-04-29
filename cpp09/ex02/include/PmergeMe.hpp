@@ -13,8 +13,8 @@
 class PmergeMe {
 	private:
 		// FIXME: Debug printing:
-		template <typename T, typename U>
-		static void printPend(T pend, U order) {
+		template <typename ContCont, typename Cont>
+		static void printPend(ContCont pend, Cont order) {
 			for (size_t i = 0; i < pend.size(); ++i) {
 				std::cout << std::setw(3) << std::right;
 				std::cout << i << ": | ";
@@ -25,9 +25,10 @@ class PmergeMe {
 			}
 		}
 
-		template <typename T, typename U>
-		static void printState(T main, T nonPart, T pend, int recDepth,
-							   bool printRecDepth, U *insertOrder) {
+		template <typename ContCont, typename Cont>
+		static void printState(ContCont main, ContCont nonPart, ContCont pend,
+							   int recDepth, bool printRecDepth,
+							   Cont *insertOrder) {
 			{
 				if (printRecDepth) {
 					std::cout << "Recursion depth: " << recDepth << std::endl;
@@ -48,17 +49,8 @@ class PmergeMe {
 		}
 		// FIXME: Remove above^^
 
-		//  Vector:
-		static std::vector<std::vector<int>> _vecMain;
-		static std::vector<std::vector<int>> _vecPend;
-		static std::vector<std::vector<int>> _vecNonPart;
-		static std::vector<std::vector<int>> _vecOdd;
-		static std::chrono::duration<float>	 _vecDuration;
-		static int							 _vecDepth;
-
-		static void vectorSortRecursion();
-		static void vectorSortJacobstahl();
-		static void loadInputToVector(const int ac, char **av);
+		static std::chrono::duration<float> _vecDuration;
+		static std::chrono::duration<float> _deqDuration;
 
 		template <typename ContCont, typename Cont>
 		static ContCont loadInput(const int ac, char **av) {
@@ -66,7 +58,6 @@ class PmergeMe {
 			ContCont main{};
 			for (int i = 1; i < ac; ++i) {
 				Cont v;
-				validateElement(av[i]);
 				a = std::stoi(av[i]);
 				if (duplicateFoundInContainer(main, a))
 					continue;
@@ -79,11 +70,8 @@ class PmergeMe {
 		template <typename ContCont, typename Cont>
 		static void SortRecursion(ContCont &main, ContCont &nonPart,
 								  int recursionDepth) {
-			// FIXME: remove pend;
-			ContCont pend{};
 			if (main.size() < 2) {
-				--recursionDepth;
-				SortJacobstahl<ContCont, Cont>(main, nonPart, recursionDepth);
+				SortJacobstahl<ContCont, Cont>(main, nonPart, --recursionDepth);
 				return;
 			}
 
@@ -95,7 +83,6 @@ class PmergeMe {
 						mainIt->insert(mainIt->end(), nextIt->begin(),
 									   nextIt->end());
 						mainIt = main.erase(nextIt);
-						// ++mainIt;
 					} else {
 						nextIt->insert(nextIt->end(), mainIt->begin(),
 									   mainIt->end());
@@ -107,34 +94,7 @@ class PmergeMe {
 					mainIt = main.erase(mainIt);
 				}
 			}
-			{
-				printState<ContCont, Cont>(main, nonPart, pend, recursionDepth,
-										   true, nullptr);
-			}
-			++recursionDepth;
-			SortRecursion<ContCont, Cont>(main, nonPart, recursionDepth);
-		}
-
-		template <typename Cont>
-		static Cont buildJacobstahlSequence(const size_t pendSize) {
-			Cont sequence{};
-			if (pendSize == 0) {
-				return (sequence);
-			}
-			int	   jacobIndex = 3;
-			size_t prevJacob = 1;
-			while (true) {
-				size_t curJacob = getJacobstahlInIndex(jacobIndex++);
-				size_t groupStart = std::min(pendSize + 1, curJacob);
-				for (; groupStart > prevJacob; --groupStart) {
-					sequence.push_back(groupStart - 2);
-				}
-				if (curJacob >= pendSize + 1) {
-					return (sequence);
-				}
-				prevJacob = curJacob;
-			}
-			return (sequence);
+			SortRecursion<ContCont, Cont>(main, nonPart, ++recursionDepth);
 		}
 
 		template <typename ContCont, typename Cont>
@@ -182,11 +142,6 @@ class PmergeMe {
 				}
 			}
 			Cont insertOrder = buildJacobstahlSequence<Cont>(pend.size());
-			{
-				std::cout << "\nBefore sorting:\n";
-				printState<ContCont>(main, nonPart, pend, recursionDepth, true,
-									 &insertOrder);
-			}
 
 			// INFO: If an element in nonPart matches the size of current
 			// set
@@ -201,33 +156,35 @@ class PmergeMe {
 										 return (a.back() < b.back());
 									 });
 				main.insert(insertPos, *pendIt);
-				for (auto e : *pendIt) {
-					std::cout << " | " << e;
-				}
-				std::cout << " | limit: " << limit << std::endl;
 				++addedCount;
 			}
 			pend.erase(pend.begin(), pend.end());
-			{
-				std::cout << "\nAfter sorting:\n";
-				printState<ContCont, Cont>(main, nonPart, pend, recursionDepth,
-										   true, nullptr);
-				std::cout << "\n______________________________\n";
-			}
-
 			SortJacobstahl<ContCont, Cont>(main, nonPart, --recursionDepth);
 		}
 
-		// Deque:
-		static std::deque<std::deque<int>>	 _deqMain;
-		static std::deque<std::deque<int>>	 _deqPend;
-		static std::vector<std::vector<int>> _deqNonPart;
-		static std::deque<std::deque<int>>	 _deqOdd;
-		static std::chrono::duration<float>	 _deqDuration;
-		static int							 _deqDepth;
+		template <typename Cont>
+		static Cont buildJacobstahlSequence(const size_t pendSize) {
+			Cont sequence{};
+			if (pendSize == 0) {
+				return (sequence);
+			}
+			int	   jacobIndex = 3;
+			size_t prevJacob = 1;
+			while (true) {
+				size_t curJacob = getJacobstahlInIndex(jacobIndex++);
+				size_t groupStart = std::min(pendSize + 1, curJacob);
+				for (; groupStart > prevJacob; --groupStart) {
+					sequence.push_back(groupStart - 2);
+				}
+				if (curJacob >= pendSize + 1) {
+					return (sequence);
+				}
+				prevJacob = curJacob;
+			}
+			return (sequence);
+		}
 
-		// Generic:
-		static void validateElement(char *elem);
+		// INFO: Generic:
 
 	public:
 		PmergeMe(void) = delete;
@@ -239,9 +196,8 @@ class PmergeMe {
 		static void							dequeSort(const int ac, char **av);
 		static std::chrono::duration<float> getVDuration(void);
 		static std::chrono::duration<float> getDDuration(void);
-		static unsigned int		   getJacobstahlInIndex(unsigned int j);
-		static std::vector<size_t> buildJacobstahlSequence(
-			const size_t pendSize);
+		static unsigned int getJacobstahlInIndex(unsigned int j);
+		static void			validateInputNumbers(const int ac, char **av);
 
 		class Timer {
 			private:
@@ -256,12 +212,12 @@ class PmergeMe {
 				~Timer();
 		};
 
-		template <typename T>
-		static bool duplicateFoundInContainer(const T  &containers,
-											  const int elem) {
-			if (containers.size() == 0)
+		template <typename ContCont>
+		static bool duplicateFoundInContainer(const ContCont &container,
+											  const int		  elem) {
+			if (container.size() == 0)
 				return (false);
-			for (const auto &container : containers) {
+			for (const auto &container : container) {
 				for (const auto &containerElem : container) {
 					if (elem == containerElem) {
 						return (true);
