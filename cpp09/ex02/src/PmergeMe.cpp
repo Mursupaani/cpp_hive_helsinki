@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
+#include <deque>
 #include <iterator>
 #include <utility>
 #include <vector>
@@ -32,9 +33,10 @@ static void printPend(T pend, std::vector<size_t> order) {
 	}
 }
 
-template <typename T>
-static void printState(T main, T nonPart, T pend, int recDepth,
-					   bool printRecDepth, std::vector<size_t> *insertOrder) {
+template <typename ContCont>
+static void printState(ContCont main, ContCont nonPart, ContCont pend,
+					   int recDepth, bool printRecDepth,
+					   std::vector<size_t> *insertOrder) {
 	{
 		if (printRecDepth) {
 			std::cout << "Recursion depth: " << recDepth << std::endl;
@@ -92,15 +94,35 @@ std::vector<size_t> PmergeMe::buildJacobstahlSequence(const size_t pendSize) {
 	return (sequence);
 }
 
-// NOTE: Vector methods:
-void PmergeMe::vectorSort(const int ac, char **av) {
-	PmergeMe::Timer timer(_vecDuration);
-	loadInputToVector(ac, av);
+void PmergeMe::dequeSort(const int ac, char **av) {
+	PmergeMe::Timer				timer(_vecDuration);
+	std::deque<std::deque<int>> nonPart{};
+	std::deque<std::deque<int>> pend{};
+	std::deque<std::deque<int>> main =
+		loadInput<std::deque<std::deque<int>>, std::deque<int>>(ac, av);
 	{
 		std::cout << "Before sorting:\n";
-		printState(_vecMain, _vecNonPart, _vecPend, _vecDepth, false, nullptr);
+		printState<std::deque<std::deque<int>>, std::deque<int>>(
+			main, nonPart, pend, 0, false, nullptr);
 	}
-	vectorSortRecursion();
+
+	SortRecursion<std::deque<std::deque<int>>, std::deque<int>>(main, pend, 0);
+}
+
+// NOTE: Vector methods:
+void PmergeMe::vectorSort(const int ac, char **av) {
+	PmergeMe::Timer				  timer(_vecDuration);
+	std::vector<std::vector<int>> nonPart{};
+	std::vector<std::vector<int>> pend{};
+	std::vector<std::vector<int>> main =
+		loadInput<std::vector<std::vector<int>>, std::vector<int>>(ac, av);
+	{
+		std::cout << "Before sorting:\n";
+		printState<std::vector<std::vector<int>>, std::vector<int>>(
+			main, nonPart, pend, 0, false, nullptr);
+	}
+	SortRecursion<std::vector<std::vector<int>>, std::vector<int>>(main, pend,
+																   0);
 }
 
 void PmergeMe::loadInputToVector(const int ac, char **av) {
@@ -141,7 +163,10 @@ void PmergeMe::vectorSortRecursion(void) {
 			mainIt = _vecMain.erase(mainIt);
 		}
 	}
-	{ printState(_vecMain, _vecNonPart, _vecPend, _vecDepth, true, nullptr); }
+	{
+		printState<std::vector<std::vector<int>>, std::vector<int>>(
+			_vecMain, _vecNonPart, _vecPend, _vecDepth, true, nullptr);
+	}
 	++_vecDepth;
 	vectorSortRecursion();
 }
@@ -215,7 +240,8 @@ void PmergeMe::vectorSortJacobstahl(void) {
 	_vecPend.erase(_vecPend.begin(), _vecPend.end());
 	{
 		std::cout << "\nAfter sorting:\n";
-		printState(_vecMain, _vecNonPart, _vecPend, _vecDepth, true, nullptr);
+		printState<std::vector<std::vector<int>>, std::vector<int>>(
+			_vecMain, _vecNonPart, _vecPend, _vecDepth, true, nullptr);
 		std::cout << "\n______________________________\n";
 	}
 
