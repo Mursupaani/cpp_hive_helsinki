@@ -3,6 +3,7 @@
 #include <climits>
 #include <cmath>
 #include <cstddef>
+#include <cstdint>
 #include <deque>
 #include <vector>
 
@@ -10,6 +11,9 @@ std::chrono::duration<float> PmergeMe::_vecDuration{};
 std::chrono::duration<float> PmergeMe::_deqDuration{};
 size_t						 PmergeMe::_numOfElems{};
 size_t						 PmergeMe::_numOfDupes{};
+size_t						 PmergeMe::_numOfOperations{};
+size_t						 PmergeMe::_vecNumOfOperations{};
+size_t						 PmergeMe::_deqNumOfOperations{};
 
 // NOTE: Generic helper methods:
 void PmergeMe::validateInputNumbers(const int ac, char **av) {
@@ -31,6 +35,15 @@ size_t PmergeMe::getNumOfDupes(void) {
 	return (_numOfDupes);
 }
 
+unsigned int PmergeMe::maximumTheoreticalComparisons(unsigned int elements) {
+	uint32_t sum{};
+	for (uint32_t k = 1; k <= elements; ++k) {
+		double value = (3.0 / 4.0) * k;
+		sum += static_cast<uint32_t>(ceil(log2(value)));
+	}
+	return (sum);
+}
+
 // NOTE: Jacobstahl generation:
 unsigned int PmergeMe::getJacobstahlInIndex(unsigned int i) {
 	if (i == 0)
@@ -42,6 +55,8 @@ unsigned int PmergeMe::getJacobstahlInIndex(unsigned int i) {
 
 // NOTE: Vector sort:
 std::vector<std::vector<int>> PmergeMe::sortVector(const int ac, char **av) {
+	_numOfOperations = 0;
+	_vecNumOfOperations = 0;
 	PmergeMe::Timer				  timer(_vecDuration);
 	std::vector<std::vector<int>> pend{};
 	std::vector<std::vector<int>> main{};
@@ -49,17 +64,21 @@ std::vector<std::vector<int>> PmergeMe::sortVector(const int ac, char **av) {
 		ac, av, main);
 	SortRecursion<std::vector<std::vector<int>>, std::vector<int>>(main, pend,
 																   0);
+	_vecNumOfOperations = _numOfOperations;
 	return (main);
 }
 
 // NOTE: Deque sort:
 std::deque<std::deque<int>> PmergeMe::sortDeque(const int ac, char **av) {
+	_numOfOperations = 0;
+	_deqNumOfOperations = 0;
 	PmergeMe::Timer				timer(_deqDuration);
 	std::deque<std::deque<int>> pend{};
 	std::deque<std::deque<int>> main{};
 	_numOfElems =
 		loadInput<std::deque<std::deque<int>>, std::deque<int>>(ac, av, main);
 	SortRecursion<std::deque<std::deque<int>>, std::deque<int>>(main, pend, 0);
+	_deqNumOfOperations = _numOfOperations;
 	return (main);
 }
 

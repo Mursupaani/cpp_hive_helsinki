@@ -51,6 +51,13 @@ class PmergeMe {
 			std::cout << "\nTime to process a range of " << _numOfElems
 					  << " elements with std::deque  : "
 					  << PmergeMe::getDDuration().count() * 1000 << " ms";
+			std::cout << "\nVector num of ops: " << _vecNumOfOperations
+					  << std::endl;
+			std::cout << "Deque num of ops: " << _deqNumOfOperations
+					  << std::endl;
+			std::cout << "Theoretical max ops: "
+					  << maximumTheoreticalComparisons(_numOfElems)
+					  << std::endl;
 			std::cout << std::endl;
 		}
 
@@ -73,8 +80,13 @@ class PmergeMe {
 		static std::chrono::duration<float> _deqDuration;
 		static size_t						_numOfElems;
 		static size_t						_numOfDupes;
+		static size_t						_numOfOperations;
+		static size_t						_vecNumOfOperations;
+		static size_t						_deqNumOfOperations;
 
 		static unsigned int getJacobstahlInIndex(unsigned int j);
+		static unsigned int maximumTheoreticalComparisons(
+			unsigned int elements);
 
 		template <typename ContCont>
 		static bool duplicateFoundInContainer(const ContCont &container,
@@ -209,6 +221,7 @@ class PmergeMe {
 				auto   insertPos =
 					std::upper_bound(main.begin(), searchRangeEnd, *pendIt,
 									 [](const Cont &a, const Cont &b) {
+										 ++_numOfOperations;
 										 return (a.back() < b.back());
 									 });
 				main.insert(insertPos, *pendIt);
