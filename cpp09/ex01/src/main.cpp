@@ -15,8 +15,10 @@
 #include "RPN.hpp"
 
 int main(int ac, char **av) {
-	if (ac != 2)
+	if (ac != 2) {
+		std::cerr << "Usage: ./RPN <args>...\n";
 		return (1);
+	}
 	std::string input = av[1];
 	try {
 		RPN::calculate(input);

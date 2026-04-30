@@ -157,11 +157,13 @@ class PmergeMe {
 						mainIt->insert(mainIt->end(), nextIt->begin(),
 									   nextIt->end());
 						mainIt = main.erase(nextIt);
+						++_numOfOperations;
 					} else {
 						nextIt->insert(nextIt->end(), mainIt->begin(),
 									   mainIt->end());
 						mainIt = main.erase(mainIt);
 						++mainIt;
+						++_numOfOperations;
 					}
 				} else {
 					nonPart.push_back(std::move(*mainIt));
